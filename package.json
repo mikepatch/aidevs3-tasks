@@ -6,10 +6,15 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "captcha": "bun src/tasks/captcha/index.ts",
+    "json": "bun src/tasks/json/index.ts"
   },
   "devDependencies": {
     "typescript": "~5.6.2",
     "vite": "^5.4.10"
+  },
+  "dependencies": {
+    "openai": "^4.71.1"
   }
 }
