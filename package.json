@@ -12,9 +12,11 @@
     "cenzura": "bun src/tasks/cenzura/index.ts",
     "mp3": "bun src/tasks/mp3/index.ts",
     "map": "bun src/tasks/map/index.ts",
-    "robotid": "bun src/tasks/robotid/index.ts"
+    "robotid": "bun src/tasks/robotid/index.ts",
+    "kategorie": "bun src/tasks/kategorie/index.ts"
   },
   "devDependencies": {
+    "@types/crypto-js": "^4.2.2",
     "@types/node": "^22.9.0",
     "typescript": "~5.6.2",
     "vite": "^5.4.10"
@@ -22,6 +24,7 @@
   "dependencies": {
     "@microsoft/tiktokenizer": "^1.0.9",
     "axios": "^1.7.7",
+    "crypto-js": "^4.2.0",
     "openai": "^4.71.1",
     "sharp": "^0.33.5"
   }
