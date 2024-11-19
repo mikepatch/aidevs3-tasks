@@ -30,7 +30,13 @@ export class TasksProvider {
       const url = this.rootUrl + additionalPath;
       const response = await fetch(url, options);
 
-      return response.json();
+      const responseText = await response.text();
+
+      try {
+        return JSON.parse(responseText);
+      } catch {
+        return responseText;
+      }
     } catch (err) {
       throw console.error("Error: ", err);
     }
