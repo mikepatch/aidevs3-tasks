@@ -1,5 +1,7 @@
-import OpenaiProvider from "../../services.ts/OpenaiProvider";
+import { OpenaiProvider } from "../../services.ts/OpenaiProvider";
 import { Data, QuestionItem } from "./types";
+
+const openaiService = new OpenaiProvider();
 
 export const fixCalculations = (data: Data) => {
   console.log("----");
@@ -61,7 +63,7 @@ export const getAnswersFromLLM = async (
 export const sendQuestionsToLLM = async (
   question: string
 ): Promise<string | null> => {
-  const res = await OpenaiProvider.getCompletion({
+  const res = await openaiService.getCompletion({
     model: "gpt-4o",
     messages: [
       {
