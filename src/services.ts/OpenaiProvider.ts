@@ -1,6 +1,5 @@
-import fs from "fs";
 import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
-import OpenAI from "openai";
+import OpenAI, { toFile } from "openai";
 import { createByModelName } from "@microsoft/tiktokenizer";
 import { ImageConfig } from "./types";
 
@@ -93,12 +92,14 @@ export class OpenaiProvider {
     return fullResponse;
   }
 
-  async transcribe(pathToFile: string): Promise<string> {
+  async transcribe(audioBuffer: Buffer): Promise<string> {
+    console.log("Transcribing audio...");
+
     const transcription = await this.openai.audio.transcriptions.create({
-      file: fs.createReadStream(pathToFile),
+      file: await toFile(audioBuffer, "speech.mp3"),
+      language: "en",
       model: "whisper-1",
     });
-
     return transcription.text;
   }
 
