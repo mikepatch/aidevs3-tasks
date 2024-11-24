@@ -1,4 +1,4 @@
-import { OpenaiProvider } from "../../services.ts/OpenaiProvider";
+import { OpenaiProvider } from "../../services/OpenaiProvider";
 import { Data, QuestionItem } from "./types";
 
 const openaiService = new OpenaiProvider();

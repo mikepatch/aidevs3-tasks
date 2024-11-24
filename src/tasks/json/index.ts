@@ -1,4 +1,4 @@
-import { TasksProvider } from "../../services.ts/TasksProvider";
+import { TasksProvider } from "../../services/TasksProvider";
 import data from "./test_data.json";
 import {
   extractQuestionsForLLM,
@@ -6,9 +6,8 @@ import {
   getAnswersFromLLM,
 } from "./tools";
 
-const tasksService = new TasksProvider();
-
 (async () => {
+  const tasksService = new TasksProvider();
   fixCalculations(data);
   const questionsForLLM = extractQuestionsForLLM(data);
   await getAnswersFromLLM(questionsForLLM);
