@@ -21,7 +21,7 @@ export class TasksProvider {
       method: "POST",
       body: JSON.stringify({ task: taskName, apikey: this.API_KEY, answer }),
     };
-
+    console.log(options.body);
     return this._fetch("/report/verify", options);
   }
 

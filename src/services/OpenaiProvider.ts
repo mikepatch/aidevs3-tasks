@@ -97,7 +97,7 @@ export class OpenaiProvider {
 
     const transcription = await this.openai.audio.transcriptions.create({
       file: await toFile(audioBuffer, "speech.mp3"),
-      language: "en",
+      language: "pl",
       model: "whisper-1",
     });
     return transcription.text;
