@@ -13,6 +13,31 @@ export class TasksProvider {
     return this._fetch(`/data/${this.API_KEY}/${taskName}`);
   }
 
+  async getDataFromEndpoint(endpoint: string, query: string) {
+    const options: RequestInit = {
+      method: "POST",
+      body: JSON.stringify({
+        apikey: this.API_KEY,
+        query,
+      }),
+    };
+
+    return this._fetch(`/${endpoint}`, options);
+  }
+
+  async queryDatabase(query: string) {
+    const options: RequestInit = {
+      method: "POST",
+      body: JSON.stringify({
+        task: "database",
+        apikey: this.API_KEY,
+        query,
+      }),
+    };
+
+    return this._fetch("/apidb", options);
+  }
+
   async sendAnswer(
     taskName: string,
     answer: AnswerType
@@ -21,7 +46,7 @@ export class TasksProvider {
       method: "POST",
       body: JSON.stringify({ task: taskName, apikey: this.API_KEY, answer }),
     };
-    console.log(options.body);
+
     return this._fetch("/report/verify", options);
   }
 
@@ -29,7 +54,6 @@ export class TasksProvider {
     try {
       const url = this.rootUrl + additionalPath;
       const response = await fetch(url, options);
-
       const responseText = await response.text();
 
       try {
