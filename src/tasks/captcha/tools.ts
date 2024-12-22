@@ -1,5 +1,5 @@
 import { ChatCompletionMessageParam } from "openai/src/resources/index.js";
-import { OpenaiProvider } from "../../services.ts/OpenaiProvider";
+import { OpenaiProvider } from "../../services/OpenaiProvider";
 import { Credentials } from "./types";
 
 const openaiService = new OpenaiProvider();

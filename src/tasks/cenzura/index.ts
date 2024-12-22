@@ -1,4 +1,4 @@
-import { TasksProvider } from "../../services.ts/TasksProvider";
+import { TasksProvider } from "../../services/TasksProvider";
 import { LOCAL_MODEL_SYSTEM_PROMPT } from "./prompts";
 
 const tasksService = new TasksProvider();
