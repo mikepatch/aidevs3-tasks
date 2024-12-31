@@ -13,7 +13,16 @@
     "mp3": "bun src/tasks/mp3/index.ts",
     "map": "bun src/tasks/map/index.ts",
     "robotid": "bun src/tasks/robotid/index.ts",
-    "kategorie": "bun src/tasks/kategorie/index.ts"
+    "kategorie": "bun src/tasks/kategorie/index.ts",
+    "arxiv": "bun src/tasks/arxiv/index.ts",
+    "dokumenty": "bun src/tasks/dokumenty/index.ts",
+    "wektory": "bun src/tasks/wektory/index.ts",
+    "database": "bun src/tasks/database/index.ts",
+    "loop": "bun src/tasks/loop/index.ts",
+    "connections": "bun src/tasks/connections/index.ts",
+    "photos": "bun src/tasks/photos/index.ts",
+    "research": "bun src/tasks/research/index.ts",
+    "softo": "bun src/tasks/softo/index.ts"
   },
   "devDependencies": {
     "@types/crypto-js": "^4.2.2",
@@ -23,9 +32,19 @@
   },
   "dependencies": {
     "@microsoft/tiktokenizer": "^1.0.9",
+    "@qdrant/js-client-rest": "^1.12.0",
+    "@types/jsdom": "^21.1.7",
+    "@types/turndown": "^5.0.5",
     "axios": "^1.7.7",
+    "chalk": "^5.4.1",
+    "cheerio": "^1.0.0",
     "crypto-js": "^4.2.0",
+    "jsdom": "^25.0.1",
+    "neo4j-driver": "^5.27.0",
+    "node-html-markdown": "^1.3.0",
     "openai": "^4.71.1",
-    "sharp": "^0.33.5"
+    "sharp": "^0.33.5",
+    "turndown": "^7.2.0",
+    "uuid": "^11.0.3"
   }
 }

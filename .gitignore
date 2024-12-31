@@ -24,3 +24,8 @@ dist-ssr
 *.sw?
 
 .env
+
+sekret
+experiment
+hidden-flag
+.aider*
