@@ -38,10 +38,23 @@ export class TasksProvider {
     return this._fetch("/apidb", options);
   }
 
+  async getDataFromReportEndpoint(taskName: string, query: string) {
+    const options: RequestInit = {
+      method: "POST",
+      body: JSON.stringify({
+        task: taskName,
+        apikey: this.API_KEY,
+        answer: query,
+      }),
+    };
+
+    return this._fetch("/report", options);
+  }
+
   async sendAnswer(
     taskName: string,
     answer: AnswerType
-  ): Promise<{ code: string; message: string }> {
+  ): Promise<{ code: number; message: string }> {
     const options: RequestInit = {
       method: "POST",
       body: JSON.stringify({ task: taskName, apikey: this.API_KEY, answer }),
