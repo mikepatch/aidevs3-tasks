@@ -8,11 +8,6 @@ import { logMessage, logAnswerResponse } from "../../utils";
 import { ChatCompletion } from "openai/src/resources/index.js";
 import { getAgentSystemPrompt } from "./prompts";
 
-type Answer = {
-  _reasoning: string;
-  [key: string]: string;
-};
-
 const TEMP_DIR = path.join(__dirname, "temp");
 const PDF_URL = "https://centrala.ag3nts.org/dane/notatnik-rafala.pdf";
 const PDF_PATH = path.join(__dirname, "note.pdf");
@@ -128,7 +123,7 @@ const sendAnswer = async (answer: string) => {
 const processQuestionsWithAgent = async (
   questions: string,
   notesContent: string,
-  remainingAttempts: number = 20,
+  remainingAttempts: number = 30,
   previousWrongAnswers: Map<string, Set<string>> = new Map(),
   correctAnswers: Map<string, string> = new Map(),
   answerFeedback?: {
@@ -255,7 +250,7 @@ const processQuestionsWithAgent = async (
 
     return answerResponse;
   } catch (error) {
-    if (remainingAttempts === 20) {
+    if (remainingAttempts === 30) {
       logMessage({
         type: "error",
         title: "Error in processing questions with Agent.",
@@ -287,11 +282,7 @@ const main = async () => {
       notesContent
     );
 
-    logMessage({
-      type: "success",
-      title: "Process completed!",
-      message: JSON.stringify(answerResponse, null, 2),
-    });
+    logAnswerResponse(answerResponse);
   } catch (error: unknown) {
     logMessage({
       type: "error",

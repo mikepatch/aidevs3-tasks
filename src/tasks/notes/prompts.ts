@@ -33,11 +33,13 @@ export const getAgentSystemPrompt = (
         </rules>
 
         <correct_answers>
+        THIS IS CRUCIAL!!!!!!!!!
         The following answers were confirmed as correct:
         ${correctAnswersString || "No correct answers yet."}
         </correct_answers>
 
         <forbidden_answers>
+        THIS IS CRUCIAL!!!!!!!!!
         UNDER ANY CIRCUMSTANCES do not use the following answers!
         ${wrongAnswersString}
         </forbidden_answers>
