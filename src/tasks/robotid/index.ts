@@ -1,13 +1,13 @@
 import OpenAI from "openai";
-import { OpenaiProvider } from "../../services/OpenaiProvider";
-import { TasksProvider } from "../../services/TasksProvider";
+import { OpenaiService } from "../../services/OpenaiService";
+import { TasksService } from "../../services/TasksService";
 import axios from "axios";
 import path from "path";
 import fs from "fs";
 import { GENERATE_IMAGE_PROMPT } from "./prompts";
 
-const openai = new OpenaiProvider();
-const tasks = new TasksProvider();
+const openai = new OpenaiService();
+const tasks = new TasksService();
 
 const saveImage = async (imageUrl: string): Promise<void> => {
   const response = await axios.get(imageUrl, { responseType: "arraybuffer" });

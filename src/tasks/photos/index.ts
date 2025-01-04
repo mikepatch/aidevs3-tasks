@@ -1,14 +1,14 @@
 import OpenAI from "openai";
-import { TasksProvider } from "../../services/TasksProvider";
-import { OpenaiProvider } from "../../services/OpenaiProvider";
+import { TasksService } from "../../services/TasksService";
+import { OpenaiService } from "../../services/OpenaiService";
 import { prompt as extractUrlsPrompt } from "./prompts/extract_urls";
 import { prompt as agentPrompt } from "./prompts/agent";
 import { ACTION, AgentDecision, ImageDescription } from "./types";
 import { BASE_URL, MAX_ATTEMPTS, RETRY_DELAY } from "./constants";
 import { extractFilenameFromUrl, sleep } from "./utils";
 
-const tasksProvider = new TasksProvider();
-const openaiProvider = new OpenaiProvider();
+const tasksProvider = new TasksService();
+const openaiProvider = new OpenaiService();
 
 const logAgentThinking = (
   attempt: number,

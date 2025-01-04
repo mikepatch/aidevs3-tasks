@@ -1,8 +1,8 @@
 import OpenAI from "openai";
 import fs from "fs/promises";
 import path from "path";
-import { OpenaiProvider } from "../../services/OpenaiProvider";
-import { TasksProvider } from "../../services/TasksProvider";
+import { OpenaiService } from "../../services/OpenaiService";
+import { TasksService } from "../../services/TasksService";
 import { logAnswerResponse } from "../../utils";
 
 type VerificationItem = {
@@ -15,11 +15,11 @@ type VerificationResult = {
   isValid: string;
 };
 
-const tasksService = new TasksProvider();
-const openaiService = new OpenaiProvider();
+const tasksProvider = new TasksService();
+const openaiProvider = new OpenaiService();
 
 const verifySingleData = async (data: string): Promise<string> => {
-  const verifyDataResponse = (await openaiService.getCompletion({
+  const verifyDataResponse = (await openaiProvider.getCompletion({
     model: "ft:gpt-4o-mini-2024-07-18:personal::Ajy7le2W",
     messages: [
       {
@@ -94,7 +94,10 @@ const main = async () => {
       .filter((item) => item.isValid === "1")
       .map((item) => item.id);
 
-    const answerResponse = await tasksService.sendAnswer("research", validData);
+    const answerResponse = await tasksProvider.sendAnswer(
+      "research",
+      validData
+    );
     logAnswerResponse(answerResponse);
   } catch (error) {
     console.error("Task failed:", error);
