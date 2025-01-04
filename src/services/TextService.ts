@@ -1,30 +1,12 @@
 import { createByModelName } from "@microsoft/tiktokenizer";
-
-export interface IDoc {
-  text: string;
-  metadata: {
-    tokens: number;
-    source?: string; // url / path
-    mimeType?: string; // mime type
-    name?: string; // filename
-    sourceUUID?: string;
-    uuid?: string;
-    duration?: number; // duration in seconds
-    headers?: Headers;
-    urls?: string[];
-    images?: string[];
-    screenshots?: string[];
-    chunkIndex?: number;
-    totalChunks?: number;
-  };
-}
-
-interface Headers {
-  [key: string]: string[];
-}
+import type { TDoc, Headers } from "./types/types";
+import { generateMetadata } from "./utils/metadata";
+import { marked, Lexer } from "marked";
 
 export class TextService {
   private tokenizer?: Awaited<ReturnType<typeof createByModelName>>;
+
+  constructor(private modelName: string = "gpt-4o") {}
 
   private readonly SPECIAL_TOKENS = new Map<string, number>([
     ["<|im_start|>", 100264],
@@ -32,16 +14,8 @@ export class TextService {
     ["<|im_sep|>", 100266],
   ]);
 
-  constructor(private modelName: string = "gpt-4") {}
-
-  private async initializeTokenizer(model?: string): Promise<void> {
-    if (!this.tokenizer || model !== this.modelName) {
-      this.modelName = model || this.modelName;
-      this.tokenizer = await createByModelName(
-        this.modelName,
-        this.SPECIAL_TOKENS
-      );
-    }
+  private formatForTokenization(text: string): string {
+    return `<|im_start|>user\n${text}<|im_end|>\n<|im_start|>assistant<|im_end|>`;
   }
 
   private countTokens(text: string): number {
@@ -56,27 +30,53 @@ export class TextService {
     return tokens.length;
   }
 
-  private formatForTokenization(text: string): string {
-    return `<|im_start|>user\n${text}<|im_end|>\n<|im_start|>assistant<|im_end|>`;
+  private async initializeTokenizer(model?: string): Promise<void> {
+    if (!this.tokenizer || model !== this.modelName) {
+      this.modelName = model || this.modelName;
+      this.tokenizer = await createByModelName(
+        this.modelName,
+        this.SPECIAL_TOKENS
+      );
+    }
+  }
+
+  async markdownToHtml(markdown: string): Promise<string> {
+    try {
+      const html = marked.parse(markdown);
+      return html;
+    } catch (error) {
+      console.error("Error converting Markdown to HTML:", error);
+      throw new Error("Failed to convert Markdown to HTML");
+    }
+  }
+
+  async htmlToMarkdown(html: string): Promise<string> {
+    try {
+      const lexer = new Lexer();
+      const tokens = lexer.lex(html);
+      const markdown = marked.parser(tokens);
+      return markdown;
+    } catch (error) {
+      console.error("Error converting HTML to Markdown:", error);
+      throw new Error("Failed to convert HTML to Markdown");
+    }
   }
 
   async split(
     text: string,
     limit: number,
-    metadata?: Partial<IDoc["metadata"]>
-  ): Promise<IDoc[]> {
-    console.log(`Starting split process with limit: ${limit} tokens`);
+    metadata?: Partial<TDoc["metadata"]>
+  ): Promise<TDoc[]> {
     await this.initializeTokenizer();
-    const chunks: IDoc[] = [];
+
     let position = 0;
+    const chunks: TDoc[] = [];
     const totalLength = text.length;
     const currentHeaders: Headers = {};
 
     while (position < totalLength) {
-      console.log(`Processing chunk starting at position: ${position}`);
       const { chunkText, chunkEnd } = this.getChunk(text, position, limit);
       const tokens = this.countTokens(chunkText);
-      console.log(`Chunk tokens: ${tokens}`);
 
       const headersInChunk = this.extractHeaders(chunkText);
       this.updateCurrentHeaders(currentHeaders, headersInChunk);
@@ -90,15 +90,15 @@ export class TextService {
           headers: { ...currentHeaders },
           urls,
           images,
+          type: metadata?.type || "text",
+          content_type: metadata?.content_type || "chunk",
           ...metadata,
         },
       });
 
-      console.log(`Chunk processed. New position: ${chunkEnd}`);
       position = chunkEnd;
     }
 
-    console.log(`Split process completed. Total chunks: ${chunks.length}`);
     return chunks;
   }
 
@@ -107,8 +107,6 @@ export class TextService {
     start: number,
     limit: number
   ): { chunkText: string; chunkEnd: number } {
-    console.log(`Getting chunk starting at ${start} with limit ${limit}`);
-
     // Account for token overhead due to formatting
     const overhead =
       this.countTokens(this.formatForTokenization("")) - this.countTokens("");
@@ -127,11 +125,6 @@ export class TextService {
     let tokens = this.countTokens(chunkText);
 
     while (tokens + overhead > limit && end > start) {
-      console.log(
-        `Chunk exceeds limit with ${
-          tokens + overhead
-        } tokens. Adjusting end position...`
-      );
       end = this.findNewChunkEnd(text, start, end);
       chunkText = text.slice(start, end);
       tokens = this.countTokens(chunkText);
@@ -142,7 +135,6 @@ export class TextService {
 
     chunkText = text.slice(start, end);
     tokens = this.countTokens(chunkText);
-    console.log(`Final chunk end: ${end}`);
     return { chunkText, chunkEnd: end };
   }
 
@@ -164,9 +156,6 @@ export class TextService {
       const chunkText = text.slice(start, extendedEnd);
       const tokens = this.countTokens(chunkText);
       if (tokens <= limit && tokens >= minChunkTokens) {
-        console.log(
-          `Extending chunk to next newline at position ${extendedEnd}`
-        );
         return extendedEnd;
       }
     }
@@ -177,9 +166,6 @@ export class TextService {
       const chunkText = text.slice(start, reducedEnd);
       const tokens = this.countTokens(chunkText);
       if (tokens <= limit && tokens >= minChunkTokens) {
-        console.log(
-          `Reducing chunk to previous newline at position ${reducedEnd}`
-        );
         return reducedEnd;
       }
     }
@@ -245,54 +231,65 @@ export class TextService {
         return `![${altText}]({{$img${imageIndex++}}})`;
       })
       .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_match, linkText, url) => {
-        urls.push(url);
-        return `[${linkText}]({{$url${urlIndex++}}})`;
+        if (!url.startsWith("{{$img")) {
+          urls.push(url);
+          return `[${linkText}]({{$url${urlIndex++}}})`;
+        }
+        return _match; // Keep image placeholders unchanged
       });
 
     return { content, urls, images };
   }
 
   async document(
-    text: string,
-    model?: string,
-    additionalMetadata?: Record<string, any>
-  ): Promise<IDoc> {
-    await this.initializeTokenizer(model);
-    const tokens = this.countTokens(text);
-    const headers = this.extractHeaders(text);
-    const { content, urls, images } = this.extractUrlsAndImages(text);
+    content: string,
+    modelName?: string,
+    metadataOverrides?: Record<string, any>
+  ): Promise<TDoc> {
+    const baseMetadata = generateMetadata({
+      source: metadataOverrides?.source || "generated",
+      name: metadataOverrides?.name || "Generated Document",
+      mimeType: metadataOverrides?.mimeType || "text/plain",
+      conversation_uuid: metadataOverrides?.conversation_uuid,
+      additional: metadataOverrides?.additional || {},
+    });
 
     return {
       text: content,
       metadata: {
-        tokens,
-        headers,
-        urls,
-        images,
-        ...additionalMetadata,
+        ...baseMetadata,
+        ...metadataOverrides,
       },
     };
   }
 
-  restorePlaceholders(idoc: IDoc): IDoc {
-    const { text, metadata } = idoc;
+  restorePlaceholders(TDoc: TDoc): TDoc {
+    const { text, metadata } = TDoc;
     let restoredText = text;
 
     // Replace image placeholders with actual URLs
-    if (metadata.images) {
+    if (metadata?.images) {
       metadata.images.forEach((url, index) => {
-        const placeholder = `{{$img${index}}}`;
-        const regex = new RegExp(`\\(\\{\\{\\$img${index}\\}\\}\\)`);
-        restoredText = restoredText.replace(regex, `(${url})`);
+        const regex = new RegExp(
+          `\\!\\[([^\\]]*)\\]\\(\\{\\{\\$img${index}\\}\\}\\)`,
+          "g"
+        );
+        restoredText = restoredText.replace(regex, `![$1](${url})`);
       });
     }
 
     // Replace URL placeholders with actual URLs
-    if (metadata.urls) {
+    if (metadata?.urls) {
       metadata.urls.forEach((url, index) => {
-        const placeholder = `{{$url${index}}}`;
-        const regex = new RegExp(`\\(\\{\\{\\$url${index}\\}\\}\\)`);
-        restoredText = restoredText.replace(regex, `(${url})`);
+        const regex = new RegExp(
+          `\\[([^\\]]*)\\]\\(\\{\\{\\$url${index}\\}\\}\\)`,
+          "g"
+        );
+        restoredText = restoredText.replace(regex, (match, p1) => {
+          // Escape underscores in the link text
+          const escapedText = p1.replace(/_/g, "\\_");
+          return `[${escapedText}](${url})`;
+        });
       });
     }
 
