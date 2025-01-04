@@ -1,107 +1,74 @@
 import { QdrantClient } from "@qdrant/js-client-rest";
-import { OpenaiProvider } from "./OpenaiProvider";
 import { v4 as uuidv4 } from "uuid";
-import path from "path";
-import fs from "fs/promises";
-
-type Point = {
-  text: string;
-  id?: string;
-  metadata?: Record<string, any>;
-};
+import { OpenaiService } from "./OpenaiService";
 
 export class VectorService {
   private client: QdrantClient;
-  private openAIService: OpenaiProvider;
+  private openaiService: OpenaiService;
 
-  constructor(openAIService: OpenaiProvider) {
+  constructor(openaiService: OpenaiService) {
     this.client = new QdrantClient({
-      url: process.env.QDRANT_URL,
-      apiKey: process.env.QDRANT_API_KEY,
+      url: process.env.QDRANT_URL!,
+      apiKey: process.env.QDRANT_API_KEY!,
     });
-    this.openAIService = openAIService;
-  }
-
-  async collectionExists(name: string): Promise<boolean> {
-    try {
-      const { collections } = await this.client.getCollections();
-      return collections.some((c) => c.name === name);
-    } catch (error) {
-      console.error("Error checking collection existence:", error);
-      throw error;
-    }
+    this.openaiService = openaiService;
   }
 
   async ensureCollection(name: string) {
-    try {
-      const { collections } = await this.client.getCollections();
-
-      if (!collections.some((c) => c.name === name)) {
-        await this.client.createCollection(name, {
-          vectors: { size: 3072, distance: "Cosine" },
-        });
-      }
-    } catch (error) {
-      console.error("Error during ensuring collection:", error);
-      throw error;
-    }
-  }
-
-  async initializeCollectionWithData(
-    name: string,
-    points: Point[],
-    outputPointsPath: string
-  ) {
-    try {
-      const { collections } = await this.client.getCollections();
-
-      if (!collections.some((c) => c.name === name)) {
-        await this.ensureCollection(name);
-        await this.addPoints(name, points, outputPointsPath);
-      }
-    } catch (error) {
-      console.error("Error during initializing collection:", error);
-      throw error;
+    const collections = await this.client.getCollections();
+    if (!collections.collections.some((c) => c.name === name)) {
+      await this.client.createCollection(name, {
+        vectors: { size: 3072, distance: "Cosine" },
+      });
     }
   }
 
   async addPoints(
     collectionName: string,
-    points: Point[],
-    outputPointsPath: string
+    points: Array<{
+      id?: string;
+      text: string;
+      metadata?: Record<string, any>;
+    }>
   ) {
-    try {
-      const pointsToUpsert = await Promise.all(
-        points.map(async (point) => {
-          const embedding = await this.openAIService.createEmbedding(
-            point.text
-          );
+    await this.ensureCollection(collectionName);
 
-          return {
-            id: point.id || uuidv4(),
-            vector: embedding,
-            payload: {
-              text: point.text,
-              ...point.metadata,
-            },
-          };
-        })
-      );
+    const pointsToUpsert = await Promise.all(
+      points.map(async (point) => {
+        const embedding = await this.openaiService.createEmbedding(point.text);
+        return {
+          id: point.id || uuidv4(),
+          vector: embedding,
+          payload: {
+            text: point.text,
+            ...point.metadata,
+          },
+        };
+      })
+    );
 
-      const pointsFilePath = path.join(outputPointsPath, "points.json");
-      await fs.writeFile(
-        pointsFilePath,
-        JSON.stringify(pointsToUpsert, null, 2)
-      );
+    await this.client.upsert(collectionName, {
+      wait: true,
+      points: pointsToUpsert,
+    });
+  }
 
-      await this.client.upsert(collectionName, {
-        wait: true,
-        points: pointsToUpsert,
-      });
-    } catch (error) {
-      console.error("Error during adding points to collection:", error);
-      throw error;
+  async updatePoint(
+    collectionName: string,
+    point: {
+      id: string;
+      text: string;
+      metadata?: Record<string, any>;
     }
+  ) {
+    await this.addPoints(collectionName, [point]);
+  }
+
+  async deletePoint(collectionName: string, id: string) {
+    await this.client.delete(collectionName, {
+      wait: true,
+      points: [id],
+    });
   }
 
   async performSearch(
@@ -110,22 +77,45 @@ export class VectorService {
     filter: Record<string, any> = {},
     limit: number = 5
   ) {
-    try {
-      const queryEmbedding = await this.openAIService.createEmbedding(query);
+    const queryEmbedding = await this.openaiService.createEmbedding(query);
+    const results = await this.client.search(collectionName, {
+      vector: queryEmbedding,
+      limit,
+      with_payload: true,
+      filter,
+    });
 
-      const searchParams = {
-        vector: queryEmbedding,
-        limit,
+    // Transform Qdrant results to match document structure
+    return results.map((result) => ({
+      text: result.payload?.text,
+      metadata: result.payload,
+    }));
+  }
+
+  async getAllPoints(collectionName: string) {
+    const points: any[] = [];
+    let hasMore = true;
+    let offset = undefined;
+
+    while (hasMore) {
+      const response = await this.client.scroll(collectionName, {
+        limit: 100,
+        offset,
         with_payload: true,
-        ...(Object.keys(filter).length > 0 ? { filter } : {}), // Only include filter if not empty
-      };
+      });
 
-      const result = await this.client.search(collectionName, searchParams);
+      points.push(...response.points);
 
-      return result;
-    } catch (error) {
-      console.error("Error during performing search:", error);
-      throw error;
+      if (
+        response.next_page_offset !== null &&
+        response.next_page_offset !== undefined
+      ) {
+        offset = response.next_page_offset;
+      } else {
+        hasMore = false;
+      }
     }
+
+    return points;
   }
 }
