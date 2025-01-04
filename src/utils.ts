@@ -32,7 +32,6 @@ export const logAnswerResponse = (response: AnswerResponse) => {
   console.log(chalk.gray("─".repeat(50)) + "\n"); // Bottom separator
 };
 
-
 export const logMessage = ({ type, title, message, details }: LogMessage) => {
   const styles = {
     info: { symbol: "ℹ️", color: chalk.blue },
@@ -44,7 +43,7 @@ export const logMessage = ({ type, title, message, details }: LogMessage) => {
 
   const { symbol, color } = styles[type];
 
-  console.log("\n" + chalk.gray("─".repeat(50)));
+  console.log(chalk.gray("─".repeat(50)));
   console.log(`${symbol} ${color.bold(title)}`);
 
   if (message) {
