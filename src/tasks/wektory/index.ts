@@ -1,15 +1,15 @@
 import { readdir, readFile } from "fs/promises";
 import path from "path";
 import { VectorService } from "../../services/VectorService";
-import { OpenaiProvider } from "../../services/OpenaiProvider";
-import { TextSplitter } from "../../services/TextService";
+import { OpenaiService } from "../../services/OpenaiService";
+import { TextService} from "../../services/TextService";
 import OpenAI from "openai";
-import { TasksProvider } from "../../services/TasksProvider";
+import { TasksService } from "../../services/TasksService";
 
-const openaiService = new OpenaiProvider();
-const vectorService = new VectorService(openaiService);
-const textSplitter = new TextSplitter();
-const tasksService = new TasksProvider();
+const openaiProvider = new OpenaiService();
+const vectorService = new VectorService(openaiProvider);
+const textSplitter = new TextService();
+const tasksProvider = new TasksService();
 
 const COLLECTION_NAME = "aidevs_wektory";
 
@@ -74,7 +74,7 @@ const main = async () => {
 
       const relevanceChecks = await Promise.all(
         searchResults.map(async (result) => {
-          const relevanceCheck = (await openaiService.getCompletion({
+          const relevanceCheck = (await openaiProvider.getCompletion({
             messages: [
               {
                 role: "system",
@@ -99,7 +99,7 @@ const main = async () => {
 
       const result = relevantResults[0].payload?.date ?? "";
 
-      const answerResponse = await tasksService.sendAnswer("wektory", result);
+      const answerResponse = await tasksProvider.sendAnswer("wektory", result);
 
       console.log(answerResponse);
       console.log(`Query: ${query}`);
