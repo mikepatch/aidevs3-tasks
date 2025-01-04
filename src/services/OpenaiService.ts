@@ -1,7 +1,7 @@
 import fs from "fs/promises";
 import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 import OpenAI, { toFile } from "openai";
-import { ImageConfig } from "./types";
+import { ImageConfig } from "./types/types";
 import { TextService } from "./TextService";
 
 interface Headers {
@@ -27,7 +27,7 @@ export interface IDoc {
   };
 }
 
-export class OpenaiProvider {
+export class OpenaiService {
   private openai: OpenAI;
   private textService: TextService;
 

@@ -1,6 +1,6 @@
 type AnswerType = string | string[] | number | number[] | object;
 
-export class TasksProvider {
+export class TasksService {
   protected API_KEY: string;
   private rootUrl: string;
 

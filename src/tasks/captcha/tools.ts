@@ -1,8 +1,8 @@
 import { ChatCompletionMessageParam } from "openai/src/resources/index.js";
-import { OpenaiProvider } from "../../services/OpenaiProvider";
+import { OpenaiService } from "../../services/OpenaiService";
 import { Credentials } from "./types";
 
-const openaiService = new OpenaiProvider();
+const openaiProvider = new OpenaiService();
 
 const URL = "https://xyz.ag3nts.org";
 
@@ -40,7 +40,7 @@ export const getCaptchaAnswer = async (question: string): Promise<string> => {
           `,
     },
   ];
-  const response = await openaiService.getCompletion({ messages });
+  const response = await openaiProvider.getCompletion({ messages });
 
   if (!("choices" in response)) {
     throw new Error("Expected a ChatCompletion, but got a stream.");

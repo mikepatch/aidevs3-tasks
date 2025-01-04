@@ -1,4 +1,4 @@
-import { TasksProvider } from "../../services/TasksProvider";
+import { TasksService } from "../../services/TasksService";
 import { CONNECTIONS_FILE_NAME, USERS_FILE_NAME } from "./constants";
 import { Neo4jService } from "./Neo4jService";
 import {
@@ -16,7 +16,7 @@ if (
   throw new Error("NEO4J_URI, NEO4J_USER, and NEO4J_PASSWORD must be set");
 }
 
-const tasksProvider = new TasksProvider();
+const tasksProvider = new TasksService();
 const neo4jService = new Neo4jService(
   process.env.NEO4J_URI,
   process.env.NEO4J_USER,

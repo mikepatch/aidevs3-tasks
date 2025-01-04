@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import { OpenaiProvider } from "../../services/OpenaiProvider";
+import { OpenaiService } from "../../services/OpenaiService";
 import { ProcessedData } from "./types";
 import { CATEGORIZE_SYSTEM_PROMPT } from "./prompts";
 
@@ -10,7 +10,7 @@ type CategorizedItem = {
 
 export const categorizeContent = async (
   content: string,
-  openaiService: OpenaiProvider
+  openaiService: OpenaiService
 ): Promise<{ category: string }> => {
   try {
     const modelResponse = (await openaiService.getCompletion({
@@ -32,7 +32,7 @@ export const categorizeContent = async (
 
 export const categorizeItems = async (
   items: ProcessedData[],
-  openaiService: OpenaiProvider
+  openaiService: OpenaiService
 ): Promise<Record<string, string[]>> => {
   const categorized = await Promise.all(
     items.map(async (item): Promise<CategorizedItem> => {

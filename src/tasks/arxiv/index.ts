@@ -2,12 +2,12 @@ import { JSDOM } from "jsdom";
 import TurndownService from "turndown";
 import fs from "fs/promises";
 import path from "path";
-import { OpenaiProvider } from "../../services/OpenaiProvider";
+import { OpenaiService } from "../../services/OpenaiService";
 import OpenAI from "openai";
-import { TasksProvider } from "../../services/TasksProvider";
+import { TasksService } from "../../services/TasksService";
 
-const openaiService = new OpenaiProvider();
-const tasksService = new TasksProvider();
+const openaiProvider = new OpenaiService();
+const tasksProvider = new TasksService();
 
 type ImageAnalysis = {
   url: string;
@@ -106,7 +106,9 @@ const analyzeAudio = async (audioUrls: string[]): Promise<AudioAnalysis[]> => {
       console.log(`Downloading and transcribing audio: ${url}`);
       const audioBuffer = await downloadAudio(url);
 
-      const transcriptionResponse = await openaiService.transcribe(audioBuffer);
+      const transcriptionResponse = await openaiProvider.transcribe(
+        audioBuffer
+      );
 
       const transcription = transcriptionResponse;
 
@@ -161,7 +163,7 @@ const analyzeImages = async (imageUrls: string[]): Promise<ImageAnalysis[]> => {
       // Placeholder for vision LLM implementation
       console.log(`Analyzing image ${i + 1}/${imageUrls.length}: ${url}`);
 
-      const visionResponse = (await openaiService.getCompletion({
+      const visionResponse = (await openaiProvider.getCompletion({
         messages: [
           {
             role: "user",
@@ -271,7 +273,7 @@ const processAudio = async (markdown: string): Promise<string> => {
 
 const main = async () => {
   try {
-    const taskDataResponse = await tasksService.getData("arxiv.txt");
+    const taskDataResponse = await tasksProvider.getData("arxiv.txt");
     console.log(taskDataResponse);
 
     const savedArticle = await fs.readFile(
@@ -279,7 +281,7 @@ const main = async () => {
       "utf-8"
     );
 
-    const modelResponse = (await openaiService.getCompletion({
+    const modelResponse = (await openaiProvider.getCompletion({
       model: "gpt-4o",
       jsonMode: true,
       messages: [
@@ -326,7 +328,7 @@ Musisz odpowiedzieć na wszystkie pytania!
 
     const parsedResult = JSON.parse(result);
 
-    const taskAnswerResponse = await tasksService.sendAnswer(
+    const taskAnswerResponse = await tasksProvider.sendAnswer(
       "arxiv",
       parsedResult
     );

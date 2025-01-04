@@ -4,9 +4,9 @@ import sharp from "sharp";
 import { readdirSync, readFileSync } from "fs";
 import path from "path";
 import { ResizedImageMetadata } from "./types";
-import { OpenaiProvider } from "../../services/OpenaiProvider";
+import { OpenaiService } from "../../services/OpenaiService";
 
-const openai = new OpenaiProvider();
+const openai = new OpenaiService();
 
 const IMAGE_DETAIL: "low" | "high" = "high";
 

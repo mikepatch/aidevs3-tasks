@@ -1,9 +1,9 @@
 import OpenAI from "openai";
-import { OpenaiProvider } from "../../services/OpenaiProvider";
-import { TasksProvider } from "../../services/TasksProvider";
+import { OpenaiService } from "../../services/OpenaiService";
+import { TasksService } from "../../services/TasksService";
 
-const openaiService = new OpenaiProvider();
-const tasksService = new TasksProvider();
+const openaiProvider = new OpenaiService();
+const tasksProvider = new TasksService();
 
 const DB_API_URL = "https://centrala.ag3nts.org/apidb";
 
@@ -22,7 +22,7 @@ const getData = async (query: string) => {
 
 const getSQLQuery = async (desc: string): Promise<string> => {
   try {
-    const modelResponse = (await openaiService.getCompletion({
+    const modelResponse = (await openaiProvider.getCompletion({
       messages: [
         {
           role: "system",
@@ -78,7 +78,7 @@ const main = async () => {
 
   console.log(result);
 
-  const answerResponse = await tasksService.sendAnswer("database", result);
+  const answerResponse = await tasksProvider.sendAnswer("database", result);
   console.log(answerResponse);
   //   console.log(
   //     await getData(`SELECT d.*

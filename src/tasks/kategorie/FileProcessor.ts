@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import { OpenaiProvider } from "../../services/OpenaiProvider";
+import { OpenaiService } from "../../services/OpenaiService";
 import { PREVIEW_IMAGE_SYSTEM_PROMPT } from "./prompts";
 import { Recording, Image, ProcessedData } from "./types";
 import fs from "fs/promises";
@@ -12,7 +12,7 @@ export class FileProcessor {
 
   constructor(
     private readonly basePath: string,
-    private readonly openaiService: OpenaiProvider
+    private readonly openaiService: OpenaiService
   ) {}
 
   async processData(): Promise<ProcessedData[]> {

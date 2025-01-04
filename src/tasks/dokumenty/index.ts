@@ -1,15 +1,15 @@
 import fs from "fs/promises";
 import path from "path";
-import { OpenaiProvider } from "../../services/OpenaiProvider";
+import { OpenaiService } from "../../services/OpenaiService";
 import OpenAI from "openai";
-import { TasksProvider } from "../../services/TasksProvider";
+import { TasksService } from "../../services/TasksService";
 
 const REPORTS_DIR = "reports";
 const FACTS_DIR = "facts";
 const OUTPUT_FILE = "document-tags.json";
 
-const openai = new OpenaiProvider();
-const tasks = new TasksProvider();
+const openai = new OpenaiService();
+const tasks = new TasksService();
 
 const generateTagsPrompt = (
   reports: Record<string, string>,

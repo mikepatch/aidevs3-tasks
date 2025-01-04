@@ -2,12 +2,12 @@ import fs from "fs";
 import path from "path";
 import OpenAI from "openai";
 import { error } from "console";
-import { OpenaiProvider } from "../../services/OpenaiProvider";
-import { TasksProvider } from "../../services/TasksProvider";
+import { OpenaiService } from "../../services/OpenaiService";
+import { TasksService } from "../../services/TasksService";
 import { transcribe } from "./transcribe";
 
-const openaiService = new OpenaiProvider();
-const tasksService = new TasksProvider();
+const openaiProvider = new OpenaiService();
+const tasksProvider = new TasksService();
 
 (async () => {
   await transcribe();
@@ -27,7 +27,7 @@ const tasksService = new TasksProvider();
     .join("\n\n");
 
   try {
-    const chatResponse = (await openaiService.getCompletion({
+    const chatResponse = (await openaiProvider.getCompletion({
       messages: [
         {
           role: "system",
@@ -44,7 +44,7 @@ const tasksService = new TasksProvider();
 
     console.log(result);
 
-    const answerResponse = await tasksService.sendAnswer("mp3", result);
+    const answerResponse = await tasksProvider.sendAnswer("mp3", result);
 
     console.log(answerResponse);
   } catch (error) {

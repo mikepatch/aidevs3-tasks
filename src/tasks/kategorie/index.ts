@@ -1,16 +1,16 @@
-import { OpenaiProvider } from "../../services/OpenaiProvider";
-import { TasksProvider } from "../../services/TasksProvider";
+import { OpenaiService } from "../../services/OpenaiService";
+import { TasksService } from "../../services/TasksService";
 import { FileProcessor } from "./FileProcessor";
 import { categorizeItems } from "./helpers";
 
 (async () => {
-  const openaiService = new OpenaiProvider();
-  const tasksProvider = new TasksProvider();
-  const fileProcessor = new FileProcessor(__dirname, openaiService);
+  const openaiProvider = new OpenaiService();
+  const tasksProvider = new TasksService();
+  const fileProcessor = new FileProcessor(__dirname, openaiProvider);
 
   try {
     const processedData = await fileProcessor.processData();
-    const sortedResult = await categorizeItems(processedData, openaiService);
+    const sortedResult = await categorizeItems(processedData, openaiProvider);
 
     const answerResponse = await tasksProvider.sendAnswer(
       "kategorie",

@@ -1,11 +1,11 @@
 import fs from "fs/promises";
-import { OpenaiProvider } from "../../services/OpenaiProvider";
-import { TasksProvider } from "../../services/TasksProvider";
+import { OpenaiService } from "../../services/OpenaiService";
+import { TasksService } from "../../services/TasksService";
 import path from "path";
 import OpenAI from "openai";
 
-const tasksProvider = new TasksProvider();
-const openaiProvider = new OpenaiProvider();
+const tasksProvider = new TasksService();
+const openaiProvider = new OpenaiService();
 
 const NOTE_PATH = path.join(__dirname, "note.txt");
 

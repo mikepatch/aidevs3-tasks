@@ -1,8 +1,8 @@
 import { promises as fs } from "fs";
 import path from "path";
-import { OpenaiProvider } from "../../services/OpenaiProvider";
+import { OpenaiService } from "../../services/OpenaiService";
 
-const openaiService = new OpenaiProvider();
+const openaiProvider = new OpenaiService();
 
 export const transcribe = async () => {
   try {
@@ -30,7 +30,7 @@ export const transcribe = async () => {
         continue;
       } catch {
         console.log(`Processing: ${filePath}`);
-        const transcription = await openaiService.transcribe(filePath);
+        const transcription = await openaiProvider.transcribe(filePath);
 
         await fs.writeFile(transcriptionPath, transcription, "utf-8");
       }
