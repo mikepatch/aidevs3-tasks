@@ -54,10 +54,14 @@ export class TasksService {
   async sendAnswer(
     taskName: string,
     answer: AnswerType
-  ): Promise<{ code: number; message: string }> {
+  ): Promise<{ code: number; message: string; hint?: string; debug?: string }> {
     const options: RequestInit = {
       method: "POST",
-      body: JSON.stringify({ task: taskName, apikey: this.API_KEY, answer }),
+      body: JSON.stringify({
+        task: taskName,
+        apikey: this.API_KEY,
+        answer: answer,
+      }),
     };
 
     return this._fetch("/report/verify", options);
