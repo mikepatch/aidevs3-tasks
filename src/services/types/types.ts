@@ -10,16 +10,13 @@ export type TDoc = {
   text: string;
   metadata: {
     tokens: number;
-    type: "audio" | "text" | "image" | "document";
-    content_type: "chunk" | "complete";
-    source?: string;
-    mimeType?: string;
-    name?: string;
-    description?: string;
+    source?: string; // url / path
+    mimeType?: string; // mime type
+    name?: string; // filename
     source_uuid?: string;
     conversation_uuid?: string;
     uuid?: string;
-    duration?: number;
+    duration?: number; // duration in seconds
     headers?: Headers;
     urls?: string[];
     images?: string[];

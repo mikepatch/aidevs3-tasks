@@ -81,7 +81,8 @@ export class OpenaiService {
     model?: OpenAI.ChatModel;
     maxTokens?: number;
   }): Promise<string> {
-    let { messages, model = "gpt-4o", maxTokens = 1024 } = config;
+    let { messages } = config;
+    const { model = "gpt-4o", maxTokens = 1024 } = config;
     let fullResponse = "";
     let isCompleted = false;
 

@@ -101,7 +101,7 @@ export class PdfService {
   }
 
   private async extractMachineText(
-    pdf: pdfjsLib.PDFDocumentProxy
+    pdf: pdfjsLib.PDFDocumentProxy,
   ): Promise<string> {
     let fullText = "";
     const uniqueImageSizes = new Map<string, boolean>();
@@ -174,7 +174,7 @@ export class PdfService {
                     uniqueImageSizes.set(sizeKey, true);
                     const imagePath = path.join(
                       this.tempDir,
-                      `text_image_${i}_${j}.png`
+                      `text_image_${i}_${j}.png`,
                     );
 
                     await sharpImage.sharpen().png().toFile(imagePath);
